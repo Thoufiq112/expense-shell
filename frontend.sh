@@ -33,22 +33,26 @@ echo "Script started executing at: $TIMESTAMP" &>>LOG_FILE_NAME
 
 CHECK_ROOT 
 
-dnf install mysql-server -y &>>$LOG_FILE_NAME
-VALIDATE $? "Installing Mysql Server"
+dnf install nginx -y 
+VALIDATE $? "Installing Nginx server"
 
-systemctl enable mysqld &>>$LOG_FILE_NAME
-VALIDATE $? "Enabling Mysql Server"
+systemctl enable nginx
+VALIDATE $? "Enabling Nginx server"
 
-systemctl start mysqld &>>$LOG_FILE_NAME
-VALIDATE $? "Starting Mysql Server"
+systemctl start nginx
+VALIDATE $? "Starting Nginx server"
 
-mysql -h mysql.daws82s.online -u root -pExpenseApp@1 -e 'show databases;' &>>$LOG_FILE_NAME
+rm -rf /usr/share/nginx/html/*
+VALIDATE $? "Removing existing version of code"
 
-if [ $? -ne 0 ]
-then
-    echo "Mysql Root password not setup" &>>$LOG_FILE_NAME
-    mysql_secure_installation --set-root-pass ExpenseApp@1
-    VALIDATE $? "Setting Root Password"
-else
-    echo -e "Mysql Root password already setup ... $Y SKIPPING $N"
-fi
+curl -o /tmp/frontend.zip https://expense-builds.s3.us-east-1.amazonaws.com/expense-frontend-v2.zip
+VALIDATE $? "Downloading latest code"
+
+cd /usr/share/nginx/html
+VALIDATE $? "Moving to html directory"
+
+unzip /tmp/frontend.zip
+VALIDATE $? "Unzipping frontend code"
+
+systemctl restart nginx
+VALIDATE $? " Restarting Nginx"
