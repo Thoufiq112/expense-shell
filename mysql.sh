@@ -12,7 +12,7 @@ LOG_FILE=$(echo $0 | cut -d "." -f1)
 TIMESTAMP=$(date +%Y-%m-%d-%H-%m-%s)
 LOG_FILE_NAME="$LOGS_FOLDER/$LOG_FILE-$TIMESTAMP.log"
 
-Validate(){
+VALIDATE(){
 if [ $1 -ne 0 ] 
 then
     echo -e "$2 ... $R Failure $N"
@@ -35,17 +35,13 @@ echo "Script started executing at: $TIMESTAMP" &>>LOG_FILE_NAME
 CHECK_ROOT 
 
 dnf install mysql-server -y &>>$LOG_FILE_NAME
-
 VALIDATE $? "Installing Mysql Server"
 
 systemctl enable mysqld &>>$LOG_FILE_NAME
-
 VALIDATE $? "Enabling Mysql Server"
 
 systemctl start mysqld &>>$LOG_FILE_NAME
-
 VALIDATE $? "Starting Mysql Server"
 
 mysql_secure_installation --set-root-pass ExpenseApp@1
-
 VALIDATE $? "Setting Root Password"
